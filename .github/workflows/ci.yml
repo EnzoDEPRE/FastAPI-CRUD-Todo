@@ -1,0 +1,124 @@
+name: CI Pipeline — FastAPI CRUD Todo
+
+# ─────────────────────────────────────────────
+# Triggers
+# ─────────────────────────────────────────────
+on:
+  # 1. Runs on every push to any branch
+  push:
+    branches:
+      - "**"
+
+  # 2. Runs on every pull request targeting main
+  pull_request:
+    branches:
+      - main
+
+  # 3. Scheduled nightly run at midnight UTC
+  schedule:
+    - cron: "0 0 * * *"
+
+  # 4. Manual trigger from the GitHub Actions UI
+  workflow_dispatch:
+
+# ─────────────────────────────────────────────
+# Jobs
+# ─────────────────────────────────────────────
+jobs:
+
+  # ── Stage 1 & 2: Setup + Unit Tests ──────────
+  test:
+    name: "🧪 Unit & Integration Tests"
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ──────────────────────────────
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+
+      # ── Python setup ──────────────────────────
+      - name: "🐍 Set up Python 3.11"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # ── Install dependencies ───────────────────
+      - name: "📦 Install dependencies"
+        run: pip install -r requirements.txt
+
+      # ── Unit tests ────────────────────────────
+      - name: "✅ Run unit tests"
+        run: pytest tests/ -v --tb=short
+
+      # ── Integration tests (API tests) ─────────
+      - name: "🔗 Run API tests with coverage"
+        run: |
+          pytest tests/ -v \
+            --cov=. \
+            --cov-report=term-missing \
+            --cov-report=html:coverage-report \
+            --cov-report=xml:coverage.xml \
+            --tb=short
+
+      # ── Upload HTML coverage report ───────────
+      - name: "📊 Upload coverage report artifact"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage-report/
+          retention-days: 30
+
+      # ── Upload XML coverage for badge ─────────
+      - name: "📈 Upload coverage XML"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          retention-days: 30
+
+  # ── Stage 3: Test Report Summary ─────────────
+  report:
+    name: "📋 Test Report Summary"
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+
+    steps:
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Set up Python 3.11"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: "📦 Install dependencies"
+        run: pip install -r requirements.txt
+
+      - name: "📋 Generate test report (JUnit XML)"
+        run: |
+          pytest tests/ \
+            --junitxml=test-results.xml \
+            -v
+        continue-on-error: true
+
+      - name: "📤 Upload JUnit test results"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results.xml
+          retention-days: 30
+
+      - name: "🔍 Display test summary"
+        if: always()
+        run: |
+          echo "========================================"
+          echo "        TEST SUITE SUMMARY"
+          echo "========================================"
+          pytest tests/ -v --tb=no -q || true
+          echo "========================================"

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FastAPI Todo App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #6366f1, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    .container { max-width: 700px; margin: 0 auto; }
+
+    /* ── Form ── */
+    .card {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid #334155;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"], select, textarea {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #e2e8f0;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus, select:focus, textarea:focus {
+      border-color: #6366f1;
+    }
+
+    input.title-input { flex: 1; min-width: 180px; }
+    input.desc-input  { flex: 2; min-width: 200px; }
+
+    select { min-width: 130px; }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 70px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-danger  { background: #ef4444; color: #fff; padding: 6px 12px; font-size: 0.8rem; }
+    .btn-warning { background: #f59e0b; color: #000; padding: 6px 12px; font-size: 0.8rem; }
+    .btn-success { background: #22c55e; color: #000; padding: 6px 12px; font-size: 0.8rem; }
+    .btn-ghost   { background: #334155; color: #e2e8f0; padding: 6px 12px; font-size: 0.8rem; }
+
+    /* ── Filters ── */
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .filters span { color: #64748b; font-size: 0.85rem; margin-right: 4px; }
+
+    .filter-btn {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: #6366f1;
+      border-color: #6366f1;
+      color: #fff;
+    }
+
+    /* ── Stats bar ── */
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 10px 18px;
+      text-align: center;
+      flex: 1;
+      min-width: 100px;
+    }
+
+    .stat .num { font-size: 1.5rem; font-weight: 700; color: #6366f1; }
+    .stat .lbl { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+
+    /* ── Todo list ── */
+    #todo-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .todo-item {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .todo-item:hover { border-color: #6366f1; }
+
+    .todo-item.done { opacity: 0.5; }
+
+    .todo-body { flex: 1; }
+
+    .todo-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+    }
+
+    .todo-desc {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .todo-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-pending     { background: #1d4ed8; color: #bfdbfe; }
+    .badge-in_progress { background: #92400e; color: #fde68a; }
+    .badge-done        { background: #14532d; color: #86efac; }
+
+    .todo-id { font-size: 0.72rem; color: #475569; }
+
+    .todo-actions { display: flex; gap: 6px; flex-wrap: wrap; align-self: center; }
+
+    /* ── Edit modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal h2 { font-size: 1.1rem; color: #e2e8f0; }
+
+    .modal input, .modal select, .modal textarea {
+      width: 100%;
+    }
+
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+
+    /* ── Empty state ── */
+    .empty {
+      text-align: center;
+      padding: 40px 0;
+      color: #475569;
+    }
+
+    .empty .icon { font-size: 3rem; margin-bottom: 12px; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #22c55e;
+      color: #000;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      z-index: 200;
+    }
+
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.error { background: #ef4444; color: #fff; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .pagination span { color: #64748b; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>📝 FastAPI Todo</h1>
+  <p class="subtitle">FastAPI · SQLite · REST API</p>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="num" id="stat-total">0</div><div class="lbl">Total</div></div>
+    <div class="stat"><div class="num" id="stat-pending" style="color:#60a5fa">0</div><div class="lbl">Pending</div></div>
+    <div class="stat"><div class="num" id="stat-progress" style="color:#f59e0b">0</div><div class="lbl">In Progress</div></div>
+    <div class="stat"><div class="num" id="stat-done" style="color:#22c55e">0</div><div class="lbl">Done</div></div>
+  </div>
+
+  <!-- Create form -->
+  <div class="card">
+    <h2>New Todo</h2>
+    <div class="form-row">
+      <input class="title-input" type="text" id="new-title" placeholder="Title *" />
+      <input class="desc-input" type="text" id="new-desc" placeholder="Description (optional)" />
+      <select id="new-status">
+        <option value="pending">Pending</option>
+        <option value="in_progress">In Progress</option>
+        <option value="done">Done</option>
+      </select>
+      <button class="btn btn-primary" onclick="createTodo()">Add</button>
+    </div>
+  </div>
+
+  <!-- Filters + list -->
+  <div class="card">
+    <div class="filters">
+      <span>Filter:</span>
+      <button class="filter-btn active" data-filter="all"    onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn"        data-filter="pending"    onclick="setFilter('pending',this)">Pending</button>
+      <button class="filter-btn"        data-filter="in_progress" onclick="setFilter('in_progress',this)">In Progress</button>
+      <button class="filter-btn"        data-filter="done"   onclick="setFilter('done',this)">Done</button>
+    </div>
+
+    <div id="todo-list"><div class="empty"><div class="icon">📭</div>No todos yet</div></div>
+
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>✏️ Edit Todo</h2>
+    <input type="text"  id="edit-title"  placeholder="Title *" />
+    <textarea           id="edit-desc"   placeholder="Description (optional)"></textarea>
+    <select             id="edit-status">
+      <option value="pending">Pending</option>
+      <option value="in_progress">In Progress</option>
+      <option value="done">Done</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn btn-ghost"   onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = 'http://127.0.0.1:8000';
+  let allTodos   = [];
+  let currentFilter = 'all';
+  let editingId  = null;
+
+  // ── Fetch all todos ──────────────────────────────────────────────────────
+  async function loadTodos() {
+    try {
+      const res = await fetch(`${API}/todos/?limit=100`);
+      allTodos = await res.json();
+      updateStats();
+      renderList();
+    } catch(e) {
+      showToast('Cannot reach the API — is uvicorn running?', true);
+    }
+  }
+
+  // ── Stats ────────────────────────────────────────────────────────────────
+  function updateStats() {
+    document.getElementById('stat-total').textContent   = allTodos.length;
+    document.getElementById('stat-pending').textContent = allTodos.filter(t => t.status === 'pending').length;
+    document.getElementById('stat-progress').textContent= allTodos.filter(t => t.status === 'in_progress').length;
+    document.getElementById('stat-done').textContent    = allTodos.filter(t => t.status === 'done').length;
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────
+  function renderList() {
+    const list = document.getElementById('todo-list');
+    const filtered = currentFilter === 'all'
+      ? allTodos
+      : allTodos.filter(t => t.status === currentFilter);
+
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty"><div class="icon">📭</div>No todos here</div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(t => `
+      <div class="todo-item ${t.status === 'done' ? 'done' : ''}">
+        <div class="todo-body">
+          <div class="todo-title">${escHtml(t.title)}</div>
+          ${t.description ? `<div class="todo-desc">${escHtml(t.description)}</div>` : ''}
+          <div class="todo-meta">
+            <span class="badge badge-${t.status}">${t.status.replace('_',' ')}</span>
+            <span class="todo-id">#${t.id}</span>
+          </div>
+        </div>
+        <div class="todo-actions">
+          ${t.status !== 'done'
+            ? `<button class="btn btn-success" onclick="markDone(${t.id})">✓ Done</button>`
+            : `<button class="btn btn-ghost"   onclick="markPending(${t.id})">↩ Reopen</button>`}
+          <button class="btn btn-warning" onclick="openEdit(${t.id})">✏️</button>
+          <button class="btn btn-danger"  onclick="deleteTodo(${t.id})">🗑</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Filter ───────────────────────────────────────────────────────────────
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
+  }
+
+  // ── Create ───────────────────────────────────────────────────────────────
+  async function createTodo() {
+    const title  = document.getElementById('new-title').value.trim();
+    const desc   = document.getElementById('new-desc').value.trim();
+    const status = document.getElementById('new-status').value;
+
+    if (!title) { showToast('Title is required!', true); return; }
+
+    const res = await fetch(`${API}/todos/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description: desc || null, status })
+    });
+
+    if (res.ok) {
+      document.getElementById('new-title').value = '';
+      document.getElementById('new-desc').value  = '';
+      document.getElementById('new-status').value = 'pending';
+      showToast('Todo created!');
+      loadTodos();
+    } else {
+      showToast('Error creating todo', true);
+    }
+  }
+
+  // ── Delete ───────────────────────────────────────────────────────────────
+  async function deleteTodo(id) {
+    if (!confirm('Delete this todo?')) return;
+    const res = await fetch(`${API}/todos/${id}`, { method: 'DELETE' });
+    if (res.ok) { showToast('Todo deleted!'); loadTodos(); }
+    else showToast('Error deleting todo', true);
+  }
+
+  // ── Quick status updates ─────────────────────────────────────────────────
+  async function markDone(id) {
+    await patchTodo(id, { status: 'done' });
+  }
+
+  async function markPending(id) {
+    await patchTodo(id, { status: 'pending' });
+  }
+
+  async function patchTodo(id, data) {
+    const res = await fetch(`${API}/todos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) { showToast('Updated!'); loadTodos(); }
+    else showToast('Error updating todo', true);
+  }
+
+  // ── Edit modal ───────────────────────────────────────────────────────────
+  function openEdit(id) {
+    const todo = allTodos.find(t => t.id === id);
+    if (!todo) return;
+    editingId = id;
+    document.getElementById('edit-title').value  = todo.title;
+    document.getElementById('edit-desc').value   = todo.description || '';
+    document.getElementById('edit-status').value = todo.status;
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    editingId = null;
+  }
+
+  async function saveEdit() {
+    const title  = document.getElementById('edit-title').value.trim();
+    const desc   = document.getElementById('edit-desc').value.trim();
+    const status = document.getElementById('edit-status').value;
+
+    if (!title) { showToast('Title is required!', true); return; }
+
+    const res = await fetch(`${API}/todos/${editingId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description: desc || null, status })
+    });
+
+    if (res.ok) { closeModal(); showToast('Todo updated!'); loadTodos(); }
+    else showToast('Error updating todo', true);
+  }
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show' + (isError ? ' error' : '');
+    setTimeout(() => { t.className = ''; }, 2800);
+  }
+
+  // ── Utils ────────────────────────────────────────────────────────────────
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Enter key on title input ─────────────────────────────────────────────
+  document.getElementById('new-title').addEventListener('keydown', e => {
+    if (e.key === 'Enter') createTodo();
+  });
+
+  // ── Close modal on overlay click ─────────────────────────────────────────
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal')) closeModal();
+  });
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  loadTodos();
+</script>
+</body>
+</html>
