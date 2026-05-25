@@ -1,9 +1,9 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 class TodoCreate(BaseModel):
-    title: str
+    title: str = Field(..., min_length=1, description="Title must not be empty")
     description: Optional[str] = None
     status: Optional[str] = "pending"
 

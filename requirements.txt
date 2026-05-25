@@ -9,3 +9,4 @@ aiofiles
 pytest==7.4.0
 pytest-cov==4.1.0
 httpx==0.24.1
+pytest-bdd==8.1.0

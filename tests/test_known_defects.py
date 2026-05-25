@@ -41,23 +41,17 @@ def test_create_todo_should_return_201(client):
 # DEFECT-002
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(strict=True, reason="DEFECT-002: Empty title string is accepted, should return 422")
-def test_create_todo_empty_title_should_be_rejected(client):
+def test_create_todo_empty_title_is_now_fixed(client):
     """
-    DEFECT-002 — POST /todos/ accepts an empty string as title.
+    DEFECT-002 — FIXED ✅
 
-    The `title` field in TodoCreate has no minimum length constraint.
-    Sending an empty string bypasses validation and creates a Todo with
-    a blank title, which has no functional value.
-
-    Status   : OPEN
-    Severity : Medium
-    Fix      : Add `min_length=1` to the title field in schemas/schemas.py:
-                 title: str = Field(..., min_length=1)
+    Empty title string is now correctly rejected with 422.
+    Fixed via TDD Feature 1: min_length=1 added to schemas.py.
+    This test now serves as a regression guard.
     """
     payload = {"title": ""}
     response = client.post("/todos/", json=payload)
-    assert response.status_code == 422  # Currently returns 200 → FAILS → XFAIL ✓
+    assert response.status_code == 422
 
 
 # ---------------------------------------------------------------------------

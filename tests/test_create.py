@@ -50,15 +50,11 @@ def test_create_todo_missing_title(client):
 
 def test_create_todo_empty_title(client):
     """
-    TC-005 — POST /todos/ with an empty title string.
+    TC-005 — POST /todos/ with an empty title string should return 422.
 
-    NOTE: The current implementation does NOT enforce a minimum length on title,
-    so FastAPI accepts this input and returns 200. This is a documented defect:
-    the API should reject empty titles with 422. This test asserts the current
-    (buggy) behaviour so the defect is visible in test reports.
+    FIXED via TDD Feature 1: min_length=1 added to title field in schemas.py.
+    The API now correctly rejects empty titles.
     """
     payload = {"title": ""}
     response = client.post("/todos/", json=payload)
-    # Document the defect: currently returns 200 instead of 422
-    # Change to `assert response.status_code == 422` once the fix is applied.
-    assert response.status_code == 200  # DEFECT: empty title should be rejected
+    assert response.status_code == 422

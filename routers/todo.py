@@ -1,7 +1,7 @@
 
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from models.models import TodoItem
 from schemas.schemas import TodoCreate, TodoUpdate, TodoOut
@@ -18,8 +18,26 @@ def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
     return db_todo
 
 @router.get("/", response_model=List[TodoOut])
-def read_todos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(TodoItem).offset(skip).limit(limit).all()
+def read_todos(
+    skip: int = 0,
+    limit: int = 10,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Return all todos, optionally filtered by status."""
+    query = db.query(TodoItem)
+    if status is not None:
+        query = query.filter(TodoItem.status == status)
+    return query.offset(skip).limit(limit).all()
+
+@router.get("/count")
+def count_todos(status: Optional[str] = None, db: Session = Depends(get_db)):
+    """Return the total number of todos, optionally filtered by status."""
+    query = db.query(TodoItem)
+    if status is not None:
+        query = query.filter(TodoItem.status == status)
+    return {"count": query.count()}
+
 
 @router.get("/{todo_id}", response_model=TodoOut)
 def read_todo(todo_id: int, db: Session = Depends(get_db)):
