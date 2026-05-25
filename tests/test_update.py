@@ -1,17 +1,3 @@
-"""
-test_update.py — Tests for the PUT /todos/{id} endpoint.
-
-Manual test cases covered:
-  - TC-012 : Update all fields of an existing Todo
-  - TC-013 : Partially update a Todo (status only)
-  - TC-014 : Update a Todo with a non-existent ID
-"""
-
-
-# ---------------------------------------------------------------------------
-# Helper
-# ---------------------------------------------------------------------------
-
 def create_todo(client, title="Initial Todo", description="Initial desc", status="pending"):
     payload = {"title": title, "description": description, "status": status}
     resp = client.post("/todos/", json=payload)
@@ -19,12 +5,7 @@ def create_todo(client, title="Initial Todo", description="Initial desc", status
     return resp.json()
 
 
-# ---------------------------------------------------------------------------
-# Tests
-# ---------------------------------------------------------------------------
-
 def test_update_todo_all_fields(client):
-    """TC-012 — PUT /todos/{id} with all fields updates the item correctly."""
     created = create_todo(client)
     todo_id = created["id"]
 
@@ -43,7 +24,6 @@ def test_update_todo_all_fields(client):
 
 
 def test_update_todo_partial_status_only(client):
-    """TC-013 — PUT /todos/{id} with only `status` leaves other fields unchanged."""
     created = create_todo(client, title="Stable Title", description="Stable Desc")
     todo_id = created["id"]
 
@@ -56,7 +36,6 @@ def test_update_todo_partial_status_only(client):
 
 
 def test_update_todo_not_found(client):
-    """TC-014 — PUT /todos/9999 returns 404 when the ID does not exist."""
     response = client.put("/todos/9999", json={"title": "Ghost update"})
     assert response.status_code == 404
     assert response.json() == {"detail": "Todo not found"}

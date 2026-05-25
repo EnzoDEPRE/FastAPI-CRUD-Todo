@@ -24,7 +24,6 @@ def read_todos(
     status: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Return all todos, optionally filtered by status."""
     query = db.query(TodoItem)
     if status is not None:
         query = query.filter(TodoItem.status == status)
@@ -32,7 +31,6 @@ def read_todos(
 
 @router.get("/count")
 def count_todos(status: Optional[str] = None, db: Session = Depends(get_db)):
-    """Return the total number of todos, optionally filtered by status."""
     query = db.query(TodoItem)
     if status is not None:
         query = query.filter(TodoItem.status == status)

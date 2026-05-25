@@ -1,16 +1,4 @@
-"""
-test_create.py — Tests for the POST /todos/ endpoint.
-
-Manual test cases covered:
-  - TC-002 : Create a Todo with all fields
-  - TC-003 : Create a Todo with title only (optional fields use defaults)
-  - TC-004 : Create a Todo without the required `title` field
-  - TC-005 : Create a Todo with an empty title string
-"""
-
-
 def test_create_todo_all_fields(client):
-    """TC-002 — POST /todos/ with all fields should return 200 and the created item."""
     payload = {
         "title": "Buy groceries",
         "description": "Milk, eggs, bread",
@@ -27,7 +15,6 @@ def test_create_todo_all_fields(client):
 
 
 def test_create_todo_title_only(client):
-    """TC-003 — POST /todos/ with title only should apply default values."""
     payload = {"title": "Call dentist"}
     response = client.post("/todos/", json=payload)
     assert response.status_code == 200
@@ -39,7 +26,6 @@ def test_create_todo_title_only(client):
 
 
 def test_create_todo_missing_title(client):
-    """TC-004 — POST /todos/ without `title` should return 422 Unprocessable Entity."""
     payload = {"description": "No title provided"}
     response = client.post("/todos/", json=payload)
     assert response.status_code == 422
@@ -49,12 +35,6 @@ def test_create_todo_missing_title(client):
 
 
 def test_create_todo_empty_title(client):
-    """
-    TC-005 — POST /todos/ with an empty title string should return 422.
-
-    FIXED via TDD Feature 1: min_length=1 added to title field in schemas.py.
-    The API now correctly rejects empty titles.
-    """
     payload = {"title": ""}
     response = client.post("/todos/", json=payload)
     assert response.status_code == 422
