@@ -49,7 +49,7 @@ For me, the application is acceptable if:
 | Item | Value |
 |---|---|
 | OS | Windows |
-| Python | 3.13 locally, Python 3.11 in GitHub Actions |
+| Python | 3.13 locally and in GitHub Actions |
 | Backend | FastAPI / Uvicorn |
 | Database | SQLite |
 | Frontend | HTML, CSS, JavaScript |
