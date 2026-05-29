@@ -7,6 +7,7 @@ coverage-report/
 coverage.xml
 test-results.xml
 ui-test-results.xml
+outputs/
 
 env/
 .venv/
