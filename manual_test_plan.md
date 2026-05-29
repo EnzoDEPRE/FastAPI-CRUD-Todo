@@ -109,9 +109,9 @@ I kept the cases in a table because it is easier to read and to compare with the
 | Manual cases | Automated tests |
 |---|---|
 | TC-001, TC-002 | `tests/test_root.py` |
-| TC-003 to TC-007 | `tests/test_create.py`, `tests/test_known_defects.py` |
+| TC-003 to TC-007 | `tests/test_create.py`, `tests/test_bug_fixes.py` |
 | TC-008 to TC-016 | `tests/test_read.py`, `tests/test_tdd.py` |
-| TC-017 to TC-021 | `tests/test_update.py`, `tests/test_known_defects.py` |
+| TC-017 to TC-021 | `tests/test_update.py`, `tests/test_bug_fixes.py` |
 | TC-022 to TC-024 | `tests/test_delete.py` |
 | TC-025 | `tests/test_ui.py` |
 | BDD scenarios | `tests/features/todo.feature`, `tests/test_bdd.py` |

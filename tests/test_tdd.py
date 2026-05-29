@@ -1,9 +1,9 @@
-def test_tdd_f1_empty_title_rejected(client):
+def test_user_cannot_create_a_todo_with_an_empty_title(client):
     response = client.post("/todos/", json={"title": ""})
     assert response.status_code == 422
 
 
-def test_tdd_f2_filter_by_status(client, create_todo):
+def test_user_can_filter_todos_by_status(client, create_todo):
     create_todo(title="Pending todo", status="pending")
     create_todo(title="Done todo", status="done")
 
@@ -15,7 +15,7 @@ def test_tdd_f2_filter_by_status(client, create_todo):
     assert data[0]["title"] == "Pending todo"
 
 
-def test_tdd_f3_count_todos(client, create_todo):
+def test_user_can_see_how_many_todos_exist(client, create_todo):
     create_todo(title="Todo 1")
     create_todo(title="Todo 2")
     create_todo(title="Todo 3")

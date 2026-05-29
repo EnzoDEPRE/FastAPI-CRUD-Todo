@@ -3,7 +3,7 @@ def test_user_can_update_all_todo_fields(client, create_todo):
     todo_id = created["id"]
 
     payload = {
-        "title": "Buy groceries — UPDATED",
+        "title": "Buy groceries - updated",
         "description": "Milk, eggs, bread, butter",
         "status": "in_progress"
     }
@@ -11,7 +11,7 @@ def test_user_can_update_all_todo_fields(client, create_todo):
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == todo_id
-    assert data["title"] == "Buy groceries — UPDATED"
+    assert data["title"] == "Buy groceries - updated"
     assert data["description"] == "Milk, eggs, bread, butter"
     assert data["status"] == "in_progress"
 

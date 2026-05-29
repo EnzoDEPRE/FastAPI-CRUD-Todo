@@ -74,6 +74,7 @@ tests/test_create.py     create tests
 tests/test_read.py       read/list tests
 tests/test_update.py     update tests
 tests/test_delete.py     delete tests
+tests/test_bug_fixes.py  checks for bugs I fixed
 tests/test_bdd.py        BDD step definitions
 tests/test_tdd.py        TDD feature tests
 tests/test_ui.py         frontend test with Playwright
