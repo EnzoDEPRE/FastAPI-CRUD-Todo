@@ -78,4 +78,4 @@ tests/          Automated API, BDD, TDD and UI tests
 ## Documentation
 
 - `manual_test_plan.md`: manual campaign and test cases
-- `documentation.md`: strategy, metrics, defects and CI/CD explanation
+- `documentation_and_reports.md`: strategy, metrics, defects and CI/CD explanation
