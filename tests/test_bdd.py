@@ -11,13 +11,15 @@ def context():
 
 @given("the database is empty")
 def database_is_empty():
-    pass
+    # The autouse clean_database fixture in conftest.py resets the database
+    # before every scenario. This step keeps the scenario readable.
+    return None
 
 
 @given(parsers.parse('I have created a todo with title "{title}"'))
 def i_have_created_todo(client, context, title):
     response = client.post("/todos/", json={"title": title})
-    assert response.status_code == 200
+    assert response.status_code == 201
     context["last_created_id"] = response.json()["id"]
 
 

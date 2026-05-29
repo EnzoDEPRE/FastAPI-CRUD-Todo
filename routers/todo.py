@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -9,9 +9,9 @@ from database.database import get_db
 
 router = APIRouter()
 
-@router.post("/", response_model=TodoOut)
+@router.post("/", response_model=TodoOut, status_code=status.HTTP_201_CREATED)
 def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
-    db_todo = TodoItem(**todo.dict())
+    db_todo = TodoItem(**todo.model_dump())
     db.add(db_todo)
     db.commit()
     db.refresh(db_todo)
@@ -49,7 +49,7 @@ def update_todo(todo_id: int, todo: TodoUpdate, db: Session = Depends(get_db)):
     db_todo = db.query(TodoItem).filter(TodoItem.id == todo_id).first()
     if not db_todo:
         raise HTTPException(status_code=404, detail="Todo not found")
-    for key, value in todo.dict(exclude_unset=True).items():
+    for key, value in todo.model_dump(exclude_unset=True).items():
         setattr(db_todo, key, value)
     db.commit()
     db.refresh(db_todo)

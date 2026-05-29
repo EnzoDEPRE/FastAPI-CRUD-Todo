@@ -2,10 +2,11 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from database.database import Base, engine
+from database.database import Base, engine, normalize_legacy_status_values
 from routers import todo
 
 Base.metadata.create_all(bind=engine)
+normalize_legacy_status_values()
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")

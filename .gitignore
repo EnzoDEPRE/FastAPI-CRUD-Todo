@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+
+.pytest_cache/
+.coverage
+coverage-report/
+coverage.xml
+test-results.xml
+ui-test-results.xml
+
+env/
+.venv/
+
+*.db
+
+.idea/

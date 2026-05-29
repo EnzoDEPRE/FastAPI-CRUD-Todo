@@ -1,11 +1,11 @@
-def test_create_todo_all_fields(client):
+def test_user_can_create_todo_with_all_fields(client):
     payload = {
         "title": "Buy groceries",
         "description": "Milk, eggs, bread",
         "status": "pending"
     }
     response = client.post("/todos/", json=payload)
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["title"] == "Buy groceries"
     assert data["description"] == "Milk, eggs, bread"
@@ -14,10 +14,10 @@ def test_create_todo_all_fields(client):
     assert data["id"] > 0
 
 
-def test_create_todo_title_only(client):
+def test_user_can_create_todo_with_only_a_title(client):
     payload = {"title": "Call dentist"}
     response = client.post("/todos/", json=payload)
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["title"] == "Call dentist"
     assert data["description"] is None
@@ -25,7 +25,7 @@ def test_create_todo_title_only(client):
     assert isinstance(data["id"], int)
 
 
-def test_create_todo_missing_title(client):
+def test_user_cannot_create_todo_without_a_title(client):
     payload = {"description": "No title provided"}
     response = client.post("/todos/", json=payload)
     assert response.status_code == 422
@@ -34,7 +34,7 @@ def test_create_todo_missing_title(client):
     assert any("title" in loc for loc in fields)
 
 
-def test_create_todo_empty_title(client):
+def test_user_cannot_create_todo_with_an_empty_title(client):
     payload = {"title": ""}
     response = client.post("/todos/", json=payload)
     assert response.status_code == 422

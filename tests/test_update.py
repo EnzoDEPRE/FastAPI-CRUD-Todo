@@ -1,12 +1,5 @@
-def create_todo(client, title="Initial Todo", description="Initial desc", status="pending"):
-    payload = {"title": title, "description": description, "status": status}
-    resp = client.post("/todos/", json=payload)
-    assert resp.status_code == 200
-    return resp.json()
-
-
-def test_update_todo_all_fields(client):
-    created = create_todo(client)
+def test_user_can_update_all_todo_fields(client, create_todo):
+    created = create_todo(title="Initial Todo", description="Initial desc", status="pending")
     todo_id = created["id"]
 
     payload = {
@@ -23,8 +16,8 @@ def test_update_todo_all_fields(client):
     assert data["status"] == "in_progress"
 
 
-def test_update_todo_partial_status_only(client):
-    created = create_todo(client, title="Stable Title", description="Stable Desc")
+def test_user_can_update_only_the_todo_status(client, create_todo):
+    created = create_todo(title="Stable Title", description="Stable Desc")
     todo_id = created["id"]
 
     response = client.put(f"/todos/{todo_id}", json={"status": "done"})
@@ -35,7 +28,15 @@ def test_update_todo_partial_status_only(client):
     assert data["description"] == "Stable Desc"
 
 
-def test_update_todo_not_found(client):
+def test_user_gets_404_when_updating_an_unknown_todo(client):
     response = client.put("/todos/9999", json={"title": "Ghost update"})
     assert response.status_code == 404
     assert response.json() == {"detail": "Todo not found"}
+
+
+def test_user_cannot_update_a_todo_with_an_empty_title(client, create_todo):
+    created = create_todo(title="Keep my title")
+
+    response = client.put(f"/todos/{created['id']}", json={"title": ""})
+
+    assert response.status_code == 422

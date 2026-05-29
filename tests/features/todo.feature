@@ -7,7 +7,7 @@ Feature: Todo API
   Scenario: Create a todo with all fields
     Given the database is empty
     When I create a todo with title "Buy groceries" and status "pending"
-    Then the response status code should be 200
+    Then the response status code should be 201
     And the todo title should be "Buy groceries"
     And the todo status should be "pending"
 
